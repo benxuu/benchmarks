@@ -1,24 +1,23 @@
 #! /bin/bash
-
+#===============================================================================================
+#   Description: Test script for Aliyun ECS. include unixbench\bonnie++\iperf
+#   Author: Ben  
+#   Intro:  
+#===============================================================================================
 # Update the system
 apt-get -y update
 apt-get -y upgrade
 #install curl for save file to OSS online;
 apt-get -y install curl
 apt-get -y install iperf
+#yum -y install gcc gcc-c autoconf gcc-c++ time perl-Time-HiRes
+
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 hostname=$(hostname)
 export PATH
-#===============================================================================================
-#   Description:  Unixbench for Test
-#   Author: Ben  
-#   Intro:  
-#===============================================================================================
+
 # install bonnie++  http://mirrors.aliyun.com/ubuntu/ trusty/main bonnie++ amd64 1.97.1
 apt-get -y install bonnie++
-
-
-
 
 
 # Create new soft download dir
@@ -38,27 +37,26 @@ else
 fi
 tar -xzf UnixBench5.1.3.tgz;
 cd UnixBench;
-
-#yum -y install gcc gcc-c autoconf gcc-c++ time perl-Time-HiRes
-
-#Run unixbench
 sed -i "s/GRAPHIC_TESTS = defined/#GRAPHIC_TESTS = defined/g" ./Makefile
 make;
-./Run >$hostname.unixbench.txt
-echo $(date) >>$hostname.unixbench.txt
-curl -T $hostname.unixbench.txt http://aliyunbenchtest.oss-cn-hangzhou.aliyuncs.com
+
+cd $home;
+
+#Run unixbench
+echo $(date) >$(hostname).unixbench.txt
+./Run >>$(hostname).unixbench.txt
+curl -T $(hostname).unixbench.txt http://aliyunbenchtest.oss-cn-hangzhou.aliyuncs.com
 
 #Run bonnie++
 mkdir /root/bonniedata
-#cd /root/bonniedata/
-bonnie++ -d /root/bonniedata/ -u root -s 4096 -m $hostname > $hostname.bonnie.txt
-echo $(date) >>$hostname.bonnie.txt
-curl -T $hostname.unixbench.txt http://aliyunbenchtest.oss-cn-hangzhou.aliyuncs.com
+echo $(date) >$(hostname).bonnie.txt
+bonnie++ -d /root/bonniedata/ -u root -s 4096 -m $hostname >>$hostname.bonnie.txt
+curl -T $(hostname).bonnie.txt http://aliyunbenchtest.oss-cn-hangzhou.aliyuncs.com
 
 #Run iperf
-iperf -c 112.124.102.169 >$hostname.iperf.txt
-echo $(date) >>$hostname.iperf.txt
-curl -T $hostname.iperf.txt http://aliyunbenchtest.oss-cn-hangzhou.aliyuncs.com
+echo $(date) >$(hostname).iperf.txt
+iperf -c 112.124.102.169 >>$(hostname).iperf.txt
+curl -T $(hostname).iperf.txt http://aliyunbenchtest.oss-cn-hangzhou.aliyuncs.com
 
 
 echo '';
