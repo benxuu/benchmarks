@@ -1,4 +1,8 @@
 #! /bin/bash
+
+# Update the system
+apt-get -y update
+apt-get -y upgrade
 #install curl for save file to OSS online;
 apt-get -y install curl
 apt-get -y install iperf
