@@ -36,7 +36,7 @@ case "$1" in
 esac
 done
 
-if [ $opt=i ||  $opt=o ] ; then
+if [[ $opt=i ]] || [[ $opt=o ]] ; then
    echo "install the benchmarks";
    # Update the system
 apt-get -y update
@@ -81,7 +81,7 @@ else
 
 
 #cd $home;
-if [ $opt=t  ||  $opt=o ] ; then
+if [[ $opt=t ]] || [[ $opt=o ]] ; then
    echo "start run the benchmarks";
 #Run unixbench
 cd /opt/unixbench;
