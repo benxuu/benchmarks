@@ -12,28 +12,31 @@ help()
    cat << HELP
    This is a benchmarks test sheel for aliyun ECS.
    USAGE EXAMPLE: 
-   ecstest -i ,install the benchmarks;
-   ecstest -d ,delete the last data;
+   ./ecstest -i ,install the benchmarks;
+   ./ecstest -d ,delete the last data;
+   ./ecstest -nc "255.255.255.255" , set this machine as a iperf client,and the server ip is $2
+   ./ecstest -ns ,set this machine as a iperf server,
 HELP
    exit 0
 }
 opt=o
 ip="112.124.102.169"  
+marktime=`date +%Y%m%d%H%M`
 while [ -n "$1" ]; do
 case "$1" in
    -h) help;shift 1;; # function help is called
    -d) opt=d;shift 1;; 
    -i) opt=i;shift 1;; 
    -t) opt=t;shift 1;; 
-   -nc) iperfopt=nc;ip=$2;shift 2;;#set this machine as a iperf client,and the server ip is $2
-   -ns) iperfopt=ns;shift 1;;
+   -nc) iperfopt=nc;ip=$2;opt=n;shift 2;;#set this machine as a iperf client,and the server ip is $2
+   -ns) iperfopt=ns;opt=n;shift 1;;#set this machine as a iperf server,
    --) shift;break;; # end of options
    -*) echo "error: no such option $1. -h for help";exit 1;;
    *) break;; # run all script;
 esac
 done
 
-if [ $opt=i ] || [ $opt=o ] ; then
+if [ $opt=i ||  $opt=o ] ; then
    echo "install the benchmarks";
    # Update the system
 apt-get -y update
@@ -78,23 +81,23 @@ else
 
 
 #cd $home;
-if [ $opt=t ] || [ $opt=o ] ; then
+if [ $opt=t  ||  $opt=o ] ; then
    echo "start run the benchmarks";
 #Run unixbench
 cd /opt/unixbench;
-echo $(date) >$(hostname).unixbench.txt
-./Run >>$(hostname).unixbench.txt
-mv $(hostname).unixbench.txt /root
+#echo $(date) >`hostname`-unixbench-${marktime}.txt
+./Run >`hostname`-unixbench-${marktime}.txt
+mv `hostname`-unixbench-${marktime}.txt /root
 
 cd /root;
-curl -T $(hostname).unixbench.txt http://aliyunbenchtest.oss-cn-hangzhou.aliyuncs.com
+curl -T `hostname`-unixbench-${marktime}.txt http://aliyunbenchtest.oss-cn-hangzhou.aliyuncs.com
 
 
 #Run bonnie++
 mkdir /root/bonniedata
-echo $(date) >$(hostname).bonnie.txt
-bonnie++ -d /root/bonniedata/ -u root -s 4096 -m $hostname >>$hostname.bonnie.txt
-curl -T $(hostname).bonnie.txt http://aliyunbenchtest.oss-cn-hangzhou.aliyuncs.com
+#echo $(date) >`hostname`-bonnie-${marktime}.txt
+bonnie++ -d /root/bonniedata/ -u root -s 4096 -m $hostname >`hostname`-bonnie-${marktime}.txt
+curl -T `hostname`-bonnie-${marktime}.txt http://aliyunbenchtest.oss-cn-hangzhou.aliyuncs.com
    
 fi
 
@@ -105,9 +108,9 @@ iperf -s;
 fi
 
 if [ $iperfopt=nc ] ;then
-echo $(date) >$(hostname).iperf.txt
-iperf -c $ip >>$(hostname).iperf.txt
-curl -T $(hostname).iperf.txt http://aliyunbenchtest.oss-cn-hangzhou.aliyuncs.com
+#echo $(date) >$(hostname).iperf.txt
+iperf -c $ip >`hostname`-iperf-${marktime}.txt
+curl -T `hostname`-iperf-${marktime}.txt http://aliyunbenchtest.oss-cn-hangzhou.aliyuncs.com
 fi
 
 
