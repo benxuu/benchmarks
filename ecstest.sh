@@ -20,6 +20,7 @@ HELP
    exit 0
 }
 opt=o
+iperfopt=nn
 ip="112.124.102.169"  
 marktime=`date +%Y%m%d%H%M`
 while [ -n "$1" ]; do
@@ -73,18 +74,18 @@ make;
 fi
  
 
-if [ $opt=d ]; then
+if [ $opt = d ] ; then
    echo "remove some test result file last time";
    rm /root/*.txt;
 else
    echo "this is a new test begin!"
-
+fi
 
 #cd $home;
-if [[ $opt=t ]] || [[ $opt=o ]] ; then
+if [[ $opt = t ]] || [[ $opt = o ]] ; then
    echo "start run the benchmarks";
 #Run unixbench
-cd /opt/unixbench;
+cd /opt/unixbench/UnixBench/
 #echo $(date) >`hostname`-unixbench-${marktime}.txt
 ./Run >`hostname`-unixbench-${marktime}.txt
 mv `hostname`-unixbench-${marktime}.txt /root
@@ -96,18 +97,17 @@ curl -T `hostname`-unixbench-${marktime}.txt http://aliyunbenchtest.oss-cn-hangz
 #Run bonnie++
 mkdir /root/bonniedata
 #echo $(date) >`hostname`-bonnie-${marktime}.txt
-bonnie++ -d /root/bonniedata/ -u root -s 4096 -m $hostname >`hostname`-bonnie-${marktime}.txt
-curl -T `hostname`-bonnie-${marktime}.txt http://aliyunbenchtest.oss-cn-hangzhou.aliyuncs.com
-   
+bonnie++ -d /root/bonniedata/ -u root -s 4096 -m `hostname` >`hostname`-bonnie-${marktime}.txt
+curl -T `hostname`-bonnie-${marktime}.txt http://aliyunbenchtest.oss-cn-hangzhou.aliyuncs.com 
 fi
 
 #Run iperf
-if [ $iperfopt=ns ] ;then
+if [ $iperfopt = ns ] ;then
 echo "set this machine to a iperf server"
 iperf -s;
 fi
 
-if [ $iperfopt=nc ] ;then
+if [ $iperfopt = nc ] ;then
 #echo $(date) >$(hostname).iperf.txt
 iperf -c $ip >`hostname`-iperf-${marktime}.txt
 curl -T `hostname`-iperf-${marktime}.txt http://aliyunbenchtest.oss-cn-hangzhou.aliyuncs.com
