@@ -12,8 +12,10 @@ help()
    cat << HELP
    This is a benchmarks test sheel for aliyun ECS.
    USAGE EXAMPLE: 
-   ./ecstest -i ,install the benchmarks;
+   ./ecstest  install and run benchmarks,except the iperf;
+   ./ecstest -i ,only install the benchmarks,don't run;
    ./ecstest -d ,delete the last data;
+   ./ecstest -t ,only do run the benchmarks, do test work,don't install again;
    ./ecstest -nc "255.255.255.255" , set this machine as a iperf client,and the server ip is $2
    ./ecstest -ns ,set this machine as a iperf server,
 HELP
@@ -37,7 +39,7 @@ case "$1" in
 esac
 done
 
-if [[ $opt=i ]] || [[ $opt=o ]] ; then
+if [[ $opt = i ]] || [[ $opt = o ]] ; then
    echo "install the benchmarks";
    # Update the system
 apt-get -y update
@@ -62,7 +64,8 @@ if [ -s UnixBench5.1.3.tgz ]; then
     echo "UnixBench5.1.3.tgz [found]"
 else
     echo "UnixBench5.1.3.tgz not found!!!download now......"
-    if ! wget -c https://github.com/benxuu/benchmarks/raw/master/unixbench/UnixBench5.1.3.tgz;then
+    #if ! wget -c https://github.com/benxuu/benchmarks/raw/master/unixbench/UnixBench5.1.3.tgz;then
+	if ! wget -c http://aliyunbenchtest.oss-cn-hangzhou.aliyuncs.com/UnixBench5.1.3.tgz;then
         echo "Failed to download UnixBench5.1.3.tgz,please download it to "${cur_dir}" directory manually and try again."
         exit 1
     fi
@@ -77,8 +80,6 @@ fi
 if [ $opt = d ] ; then
    echo "remove some test result file last time";
    rm /root/*.txt;
-else
-   echo "this is a new test begin!"
 fi
 
 #cd $home;
@@ -86,7 +87,6 @@ if [[ $opt = t ]] || [[ $opt = o ]] ; then
    echo "start run the benchmarks";
 #Run unixbench
 cd /opt/unixbench/UnixBench/
-#echo $(date) >`hostname`-unixbench-${marktime}.txt
 ./Run >`hostname`-unixbench-${marktime}.txt
 mv `hostname`-unixbench-${marktime}.txt /root
 
@@ -96,7 +96,6 @@ curl -T `hostname`-unixbench-${marktime}.txt http://aliyunbenchtest.oss-cn-hangz
 
 #Run bonnie++
 mkdir /root/bonniedata
-#echo $(date) >`hostname`-bonnie-${marktime}.txt
 bonnie++ -d /root/bonniedata/ -u root -s 4096 -m `hostname` >`hostname`-bonnie-${marktime}.txt
 curl -T `hostname`-bonnie-${marktime}.txt http://aliyunbenchtest.oss-cn-hangzhou.aliyuncs.com 
 fi
@@ -108,18 +107,15 @@ iperf -s;
 fi
 
 if [ $iperfopt = nc ] ;then
-#echo $(date) >$(hostname).iperf.txt
 iperf -c $ip >`hostname`-iperf-${marktime}.txt
 curl -T `hostname`-iperf-${marktime}.txt http://aliyunbenchtest.oss-cn-hangzhou.aliyuncs.com
 fi
 
 
- 
+#echo "================The test work is end==============" 
 
-
-
-echo "The test work is end, What are your want to do next?"
-select var in "logonout" "reboot" "delete the test data" "Other"; do
-  break;
-done
-echo "You have selected $var"
+#echo "The test work is end, What are your want to do next?"
+#select var in "logonout" "reboot" "delete the test data" "Other"; do
+#  break;
+#done
+#echo "You have selected $var"
